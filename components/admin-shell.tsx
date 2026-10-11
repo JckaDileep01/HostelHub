@@ -61,13 +61,28 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [hostname, setHostname] = useState('admin.hostelhub.app');
+  const [hostname, setHostname] = useState('admin.kupera.in');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setHostname(window.location.host);
     }
   }, []);
+
+  const { isSuperAdmin } = useAdmin();
+  const authLoading = useAuth().loading;
+
+  useEffect(() => {
+    if (!authLoading && pathname !== '/admin/login') {
+      if (!profile || !isSuperAdmin) {
+        router.push('/admin/login');
+      }
+    }
+  }, [profile, isSuperAdmin, pathname, router, authLoading]);
+
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
 
   const handleRefresh = async () => {
     setIsRefreshing(true);

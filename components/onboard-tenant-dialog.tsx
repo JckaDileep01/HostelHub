@@ -103,7 +103,7 @@ export function OnboardTenantDialog({
     setSelectedRoomId(roomId);
     setSelectedBedId('');
     const room = rooms.find((r) => r.id === roomId);
-    if (room && !monthlyRent) {
+    if (room && (!monthlyRent || monthlyRent === '0')) {
       setMonthlyRent(String(room.monthly_rent));
     }
   }
@@ -157,20 +157,47 @@ export function OnboardTenantDialog({
     return true;
   }
 
-  function handleNext() {
-    if (step === 1 && !validateStep1()) return;
-    if (step === 2 && !validateStep2()) return;
-    setStep((s) => s + 1);
+  function handleNext(e?: React.MouseEvent) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (step === 1) {
+      if (!validateStep1()) return;
+      setStep(2);
+      return;
+    }
+    if (step === 2) {
+      if (!validateStep2()) return;
+      // If monthly rent isn't populated yet, populate from chosen room
+      if (!monthlyRent && selectedRoom) {
+        setMonthlyRent(String(selectedRoom.monthly_rent));
+      }
+      // Stop and go to Step 3
+      setStep(3);
+      return;
+    }
   }
 
-  async function handleOnboard(e: FormEvent) {
-    e.preventDefault();
+  async function handleOnboard(e?: FormEvent | React.MouseEvent) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // STRICT CHECK: Cannot onboard unless currently on Step 3
+    if (step < 3) {
+      handleNext();
+      return;
+    }
+
     if (!hostelId) {
       toast({ title: 'No hostel selected', variant: 'destructive' });
       return;
     }
-    if (!monthlyRent) {
-      toast({ title: 'Monthly rent is required', variant: 'destructive' });
+    if (!monthlyRent || parseFloat(monthlyRent) <= 0) {
+      toast({ title: 'Please enter a valid monthly rent amount', variant: 'destructive' });
       return;
     }
 
@@ -266,11 +293,34 @@ export function OnboardTenantDialog({
             status: 'pending',
           });
         }
+
+        // Send welcome email with tenant portal link if email provided
+        if (email.trim()) {
+          try {
+            const emailRes = await fetch('/api/tenants/send-onboarding-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                tenantId: tenant.id,
+                hostelId: hostelId,
+                tenantData: tenant,
+              }),
+            });
+            const emailData = await emailRes.json();
+            if (!emailRes.ok || !emailData.emailSent) {
+              console.warn('Onboarding email dispatch warning:', emailData);
+            }
+          } catch (e) {
+            console.error('Email trigger error:', e);
+          }
+        }
       }
 
       toast({
         title: 'Tenant onboarded successfully! 🎉',
-        description: `${fullName} has been added and assigned to room.`,
+        description: email.trim()
+          ? `${fullName} added. Welcome email with portal link sent to ${email}!`
+          : `${fullName} has been added and assigned to room.`,
       });
 
       handleClose(false);
@@ -380,8 +430,8 @@ export function OnboardTenantDialog({
           </div>
         </div>
 
-        {/* Form Body - Scrollable */}
-        <form onSubmit={handleOnboard} className="flex-1 flex flex-col overflow-hidden">
+        {/* Content Body - Scrollable */}
+        <div className="flex-1 flex flex-col overflow-hidden">
           <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 no-scrollbar">
             {/* ── STEP 1: PERSONAL INFORMATION ── */}
             {step === 1 && (
@@ -401,6 +451,12 @@ export function OnboardTenantDialog({
                       required
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleNext();
+                        }
+                      }}
                       placeholder="e.g. Rahul Sharma"
                       className="h-10 text-sm rounded-xl"
                     />
@@ -418,6 +474,12 @@ export function OnboardTenantDialog({
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleNext();
+                          }
+                        }}
                         placeholder="+91 9876543210"
                         className="pl-9 h-10 text-sm rounded-xl"
                       />
@@ -435,6 +497,12 @@ export function OnboardTenantDialog({
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleNext();
+                          }
+                        }}
                         placeholder="rahul@example.com"
                         className="pl-9 h-10 text-sm rounded-xl"
                       />
@@ -449,6 +517,12 @@ export function OnboardTenantDialog({
                       id="tenant-em-name"
                       value={emergencyName}
                       onChange={(e) => setEmergencyName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleNext();
+                        }
+                      }}
                       placeholder="Parent / Guardian Name"
                       className="h-10 text-sm rounded-xl"
                     />
@@ -463,6 +537,12 @@ export function OnboardTenantDialog({
                       type="tel"
                       value={emergencyPhone}
                       onChange={(e) => setEmergencyPhone(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleNext();
+                        }
+                      }}
                       placeholder="+91 9876543211"
                       className="h-10 text-sm rounded-xl"
                     />
@@ -584,15 +664,30 @@ export function OnboardTenantDialog({
             {/* ── STEP 3: BILLING & AGREEMENT ── */}
             {step === 3 && (
               <div className="space-y-4 animate-fade-in">
-                <div className="flex items-center gap-2 pb-2 border-b border-border">
-                  <CreditCard className="w-4 h-4 text-primary" />
-                  <h3 className="font-semibold text-base sm:text-lg">Billing & Agreement Details</h3>
+                <div className="flex items-center justify-between pb-2 border-b border-border">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-primary" />
+                    <h3 className="font-semibold text-base sm:text-lg">Billing & Agreement Details</h3>
+                  </div>
+                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/15 text-primary">
+                    Final Step: Review & Edit
+                  </span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 text-xs text-foreground/80 flex items-center gap-2">
+                  <span className="font-bold text-primary">💡 Important:</span>
+                  Please review and modify the monthly rent, advance payment, and agreement dates below before finishing onboarding.
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="tenant-rent" className="text-xs sm:text-sm font-semibold">
-                      Monthly Rent (₹) <span className="text-red-500">*</span>
+                    <Label htmlFor="tenant-rent" className="text-xs sm:text-sm font-semibold flex items-center justify-between">
+                      <span>Monthly Rent (₹) <span className="text-red-500">*</span></span>
+                      {selectedRoom?.monthly_rent ? (
+                        <span className="text-[11px] font-normal text-muted-foreground">
+                          Room Base: ₹{selectedRoom.monthly_rent}
+                        </span>
+                      ) : null}
                     </Label>
                     <div className="relative">
                       <IndianRupee className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -602,15 +697,16 @@ export function OnboardTenantDialog({
                         type="number"
                         value={monthlyRent}
                         onChange={(e) => setMonthlyRent(e.target.value)}
-                        placeholder="6500"
-                        className="pl-9 h-10 text-sm rounded-xl font-semibold"
+                        placeholder="e.g. 6500"
+                        className="pl-9 h-10 text-sm rounded-xl font-semibold bg-background"
+                        autoFocus
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
                     <Label htmlFor="tenant-deposit" className="text-xs sm:text-sm font-semibold">
-                      Advance Payment (₹)
+                      Advance / Security Deposit (₹)
                     </Label>
                     <div className="relative">
                       <IndianRupee className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -620,10 +716,10 @@ export function OnboardTenantDialog({
                         value={securityDeposit}
                         onChange={(e) => setSecurityDeposit(e.target.value)}
                         placeholder="e.g. 5000"
-                        className="pl-9 h-10 text-sm rounded-xl font-semibold"
+                        className="pl-9 h-10 text-sm rounded-xl font-semibold bg-background"
                       />
                     </div>
-                    <p className="text-[11px] text-muted-foreground">One-time payment collected at joining. A separate invoice will be created.</p>
+                    <p className="text-[11px] text-muted-foreground">One-time advance/deposit collected upon joining.</p>
                   </div>
 
                   <div className="space-y-1.5">
@@ -671,7 +767,7 @@ export function OnboardTenantDialog({
 
                 <div className="p-3.5 rounded-xl bg-secondary/50 border text-xs text-muted-foreground">
                   <p className="font-semibold text-foreground mb-0.5">Automated First Invoice</p>
-                  Completing onboarding will automatically generate the initial pending rent invoice and link the tenant to their assigned bed.
+                  Completing onboarding will automatically generate the initial pending rent invoice and mark the selected bed as occupied.
                 </div>
               </div>
             )}
@@ -699,17 +795,30 @@ export function OnboardTenantDialog({
               </Button>
             )}
 
-            {step < 3 ? (
+            {step === 1 && (
               <Button
                 type="button"
-                onClick={handleNext}
+                onClick={() => handleNext()}
                 className="h-9 sm:h-10 text-xs sm:text-sm rounded-xl px-4 sm:px-6 shadow-md shadow-primary/20"
               >
-                Next <ChevronRight className="w-4 h-4 ml-1.5" />
+                Next: KYC & Room <ChevronRight className="w-4 h-4 ml-1.5" />
               </Button>
-            ) : (
+            )}
+
+            {step === 2 && (
               <Button
-                type="submit"
+                type="button"
+                onClick={() => handleNext()}
+                className="h-9 sm:h-10 text-xs sm:text-sm rounded-xl px-4 sm:px-6 shadow-md shadow-primary/20"
+              >
+                Next: Rent & Advance (Step 3) <ChevronRight className="w-4 h-4 ml-1.5" />
+              </Button>
+            )}
+
+            {step === 3 && (
+              <Button
+                type="button"
+                onClick={() => void handleOnboard()}
                 disabled={submitting}
                 className="h-9 sm:h-10 text-xs sm:text-sm rounded-xl px-4 sm:px-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20"
               >
@@ -723,7 +832,7 @@ export function OnboardTenantDialog({
               </Button>
             )}
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

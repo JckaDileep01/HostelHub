@@ -50,6 +50,7 @@ interface DashboardData {
   recentComplaints: Complaint[];
   recentCalls: AICallLog[];
   pendingMaintenance: MaintenanceTask[];
+  subscriptionStatus?: string;
 }
 
 export default function DashboardPage() {
@@ -79,6 +80,7 @@ export default function DashboardPage() {
       { data: aiCalls },
       { data: maintenance },
       { data: floorsData },
+      { data: ownerSub },
     ] = await Promise.all([
       supabase.from('hostels').select('*').eq('id', hostelId!).maybeSingle(),
       supabase.from('rooms').select('*, beds(*)').eq('hostel_id', hostelId!),
@@ -88,6 +90,7 @@ export default function DashboardPage() {
       supabase.from('ai_call_logs').select('*, tenant:tenants(*)').eq('hostel_id', hostelId!).order('created_at', { ascending: false }).limit(5),
       supabase.from('maintenance_tasks').select('*, room:rooms(*)').eq('hostel_id', hostelId!).eq('status', 'pending').order('created_at', { ascending: false }).limit(5),
       supabase.from('floors').select('*').eq('hostel_id', hostelId!).order('floor_number', { ascending: true }),
+      supabase.from('owner_subscriptions').select('*').eq('hostel_owner_id', profile?.id).maybeSingle(),
     ]);
 
     const rawRooms = (rooms || []) as any[];
@@ -156,9 +159,10 @@ export default function DashboardPage() {
       recentComplaints: complaintList,
       recentCalls: callList,
       pendingMaintenance: maintenanceList,
+      subscriptionStatus: ownerSub?.status || 'ACTIVE',
     });
     setLoading(false);
-  }, [hostelId, isReady]);
+  }, [hostelId, isReady, profile?.id]);
 
   useEffect(() => {
     void loadDashboard();
@@ -181,6 +185,32 @@ export default function DashboardPage() {
 
   if (!data?.hostel) {
     return null;
+  }
+
+  if (data.subscriptionStatus === 'EXPIRED') {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <Card className="w-full max-w-md shadow-2xl border-red-500/20 bg-slate-900 animate-in zoom-in-95">
+          <CardHeader className="text-center pb-4 pt-8">
+            <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
+              <AlertCircle className="w-8 h-8 text-red-500" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-white">Premium Expired</CardTitle>
+            <CardDescription className="text-slate-400 mt-2">
+              Your HostelHub Premium Subscription has Expired. All services are temporarily suspended.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center pb-8">
+            <p className="text-slate-300 font-medium mb-6">
+              Pay ₹599 to instantly enable all services.
+            </p>
+            <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 shadow-lg shadow-indigo-600/30">
+              Renew Premium Now
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const stats = [

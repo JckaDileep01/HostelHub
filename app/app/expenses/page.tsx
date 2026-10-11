@@ -564,22 +564,22 @@ export default function ExpensesPage() {
 
       {/* ── Add Expense Modal ── */}
       <Dialog open={addOpen} onOpenChange={(o) => { if (!o) { setAddOpen(false); setForm(INIT_FORM); } }}>
-        <DialogContent className="max-w-md p-0 overflow-hidden bg-card border-border rounded-3xl shadow-2xl">
-          <div className="bg-gradient-to-r from-rose-500/15 via-orange-500/10 to-transparent p-6 pb-4 border-b">
+        <DialogContent className="w-[calc(100vw-24px)] sm:w-full max-w-md max-h-[92vh] flex flex-col p-0 overflow-hidden bg-card border-border rounded-2xl sm:rounded-3xl shadow-2xl">
+          <div className="bg-gradient-to-r from-rose-500/15 via-orange-500/10 to-transparent p-4 sm:p-6 pb-3 sm:pb-4 border-b shrink-0">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-md">
+              <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-md shrink-0">
                   <Plus className="w-4 h-4 text-white" />
                 </div>
                 Log Expense
               </DialogTitle>
-              <DialogDescription className="text-sm mt-1">
+              <DialogDescription className="text-xs sm:text-sm mt-1">
                 Record an operational cost for your hostel&apos;s financial ledger.
               </DialogDescription>
             </DialogHeader>
           </div>
 
-          <form onSubmit={handleAdd} className="p-6 space-y-4 overflow-y-auto max-h-[70vh]">
+          <form onSubmit={handleAdd} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4 overflow-y-auto flex-1 no-scrollbar">
             {/* Title */}
             <div className="space-y-1.5">
               <Label htmlFor="exp-title" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

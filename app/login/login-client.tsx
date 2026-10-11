@@ -9,10 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Loader2, Lock, Mail, Eye, EyeOff, Sparkles, Copy, Check, ArrowLeft } from 'lucide-react';
-
-const DEMO_EMAIL = 'demo.owner@hostelhub.test';
-const DEMO_PASSWORD = 'DemoHostel123!';
+import { Building2, Loader2, Lock, Mail, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 export default function LoginClient() {
   const router = useRouter();
@@ -21,7 +18,6 @@ export default function LoginClient() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [copiedField, setCopiedField] = useState<'email' | 'password' | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -44,24 +40,6 @@ export default function LoginClient() {
     router.push('/app/dashboard');
   }
 
-  function handleFillDemo() {
-    setEmail(DEMO_EMAIL);
-    setPassword(DEMO_PASSWORD);
-    toast({
-      title: 'Demo credentials loaded! ✨',
-      description: 'Click "Sign In" to access the demo dashboard.',
-    });
-  }
-
-  function handleCopy(text: string, field: 'email' | 'password') {
-    navigator.clipboard.writeText(text);
-    setCopiedField(field);
-    toast({
-      title: `Copied ${field === 'email' ? 'Email' : 'Password'} to clipboard`,
-    });
-    setTimeout(() => setCopiedField(null), 2000);
-  }
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 transition-colors">
       <div className="w-full max-w-md space-y-4">
@@ -82,8 +60,8 @@ export default function LoginClient() {
             <Building2 className="w-7 h-7 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">HostelHub</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Smart Management Platform</p>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kupera</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Hostel & PG Management Suite</p>
           </div>
         </div>
 
@@ -167,57 +145,23 @@ export default function LoginClient() {
           </form>
         </Card>
 
-        {/* Demo Credentials Box */}
-        <div className="rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/70 dark:bg-indigo-950/40 p-4 shadow-sm backdrop-blur-sm">
-          <div className="flex items-center justify-between mb-2.5">
-            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-              Sample Demo Credentials
-            </div>
-            <button
-              type="button"
-              onClick={handleFillDemo}
-              className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-colors cursor-pointer"
-            >
-              <Sparkles className="w-3 h-3" />
-              Auto-fill Form
-            </button>
-          </div>
-
-          <div className="space-y-1.5 text-xs font-mono">
-            <div className="flex items-center justify-between bg-white/80 dark:bg-slate-900/80 px-2.5 py-1.5 rounded border border-indigo-100 dark:border-indigo-950">
-              <span className="text-slate-500 dark:text-slate-400 font-sans">Email:</span>
-              <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-slate-800 dark:text-slate-200 select-all">{DEMO_EMAIL}</span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy(DEMO_EMAIL, 'email')}
-                  className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-0.5"
-                  title="Copy email"
-                >
-                  {copiedField === 'email' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between bg-white/80 dark:bg-slate-900/80 px-2.5 py-1.5 rounded border border-indigo-100 dark:border-indigo-950">
-              <span className="text-slate-500 dark:text-slate-400 font-sans">Password:</span>
-              <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-slate-800 dark:text-slate-200 select-all">{DEMO_PASSWORD}</span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy(DEMO_PASSWORD, 'password')}
-                  className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-0.5"
-                  title="Copy password"
-                >
-                  {copiedField === 'password' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-            </div>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 text-center">
-            Click <strong className="text-indigo-600 dark:text-indigo-400 font-medium">Auto-fill Form</strong> above to instantly load test credentials.
+        {/* Security Assurance */}
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 p-3.5 text-center text-xs text-slate-500 dark:text-slate-400">
+          <p className="flex items-center justify-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
+            <Lock className="w-3.5 h-3.5 text-indigo-500" /> Enterprise-Grade Access Protection
           </p>
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+            Sessions are authenticated securely via Supabase Auth with Row-Level Security (RLS).
+          </p>
+        </div>
+
+        <div className="text-center">
+          <Link
+            href="/admin/login"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors"
+          >
+            Platform Administrator? <span className="underline">Super Admin Login →</span>
+          </Link>
         </div>
       </div>
     </div>

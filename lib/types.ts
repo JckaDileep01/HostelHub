@@ -238,7 +238,7 @@ export interface AdminHostelOverview extends Hostel {
 // ─── Razorpay Payment Engine Types ───────────────────────────────────────────
 
 export type RentTransactionStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
-export type OwnerSubscriptionStatus = 'CREATED' | 'ACTIVE' | 'HALTED' | 'CANCELLED';
+export type OwnerSubscriptionStatus = 'CREATED' | 'ACTIVE' | 'HALTED' | 'CANCELLED' | 'EXPIRED';
 
 export interface OwnerPaymentAccount {
   id: string;

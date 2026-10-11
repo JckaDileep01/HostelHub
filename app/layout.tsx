@@ -9,7 +9,7 @@ import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://hostelhub.app';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kupera.in';
 
 // Runs synchronously before React hydrates — prevents flash of wrong theme
 const themeScript = `(function(){try{var s=localStorage.getItem('theme');if(s==='dark')document.documentElement.classList.add('dark');}catch(e){}})();`;
@@ -17,12 +17,13 @@ const themeScript = `(function(){try{var s=localStorage.getItem('theme');if(s===
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: 'HostelHub — Smart Hostel Management Platform',
-    template: '%s | HostelHub',
+    default: 'Kupera — Smart Hostel Management & Operations Platform',
+    template: '%s | Kupera',
   },
   description:
-    'HostelHub is an all-in-one hostel management system for owners and caretakers. Manage rooms, beds, tenants, rent collection, KYC, AI-powered payment reminders, maintenance, and multi-property dashboards — all in one place.',
+    'Kupera is an all-in-one cloud operating system for hostel and PG owners. Manage rooms, beds, tenants, rent collection, KYC, AI-powered payment reminders, maintenance, and multi-property dashboards — all in one place.',
   keywords: [
+    'Kupera',
     'hostel management system',
     'hostel software',
     'PG management',
@@ -38,9 +39,9 @@ export const metadata: Metadata = {
     'AI rent reminder',
     'hostel maintenance tracker',
   ],
-  authors: [{ name: 'HostelHub', url: APP_URL }],
-  creator: 'HostelHub',
-  publisher: 'HostelHub',
+  authors: [{ name: 'Kupera', url: APP_URL }],
+  creator: 'Kupera',
+  publisher: 'Kupera',
   robots: {
     index: true,
     follow: true,
@@ -56,8 +57,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_IN',
     url: APP_URL,
-    siteName: 'HostelHub',
-    title: 'HostelHub — Smart Hostel Management Platform',
+    siteName: 'Kupera',
+    title: 'Kupera — Smart Hostel Management & Operations Platform',
     description:
       'Manage rooms, beds, tenants, rent, KYC, AI payment reminders & maintenance from a single dashboard. Built for hostel owners across India.',
     images: [
@@ -65,23 +66,23 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'HostelHub — Smart Hostel Management Platform',
+        alt: 'Kupera — Smart Hostel Management Platform',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'HostelHub — Smart Hostel Management Platform',
+    title: 'Kupera — Smart Hostel Management Platform',
     description:
       'All-in-one hostel management: rooms, beds, tenants, rent, KYC & AI reminders. Built for hostel owners.',
     images: ['/og-image.png'],
-    creator: '@hostelhub_app',
+    creator: '@kupera_in',
   },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'HostelHub',
+    title: 'Kupera',
   },
   formatDetection: {
     telephone: true,
@@ -111,12 +112,12 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'SoftwareApplication',
-              name: 'HostelHub',
+              name: 'Kupera',
               url: APP_URL,
               applicationCategory: 'BusinessApplication',
               operatingSystem: 'Web',
               description:
-                'All-in-one hostel management system for owners and caretakers. Manage rooms, beds, tenants, rent, KYC, and maintenance.',
+                'All-in-one hostel and PG operations platform. Manage rooms, beds, tenants, automated rent billing, KYC, and maintenance.',
               offers: {
                 '@type': 'Offer',
                 price: '0',

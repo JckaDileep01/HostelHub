@@ -86,19 +86,19 @@ export default function AdminSettingsPage() {
           <div className="p-4 rounded-xl bg-background border border-border space-y-3 font-mono text-xs">
             <div className="flex items-center justify-between text-muted-foreground">
               <span>Admin Subdomain:</span>
-              <span className="font-bold text-indigo-300">admin.hostelhub.app</span>
+              <span className="font-bold text-indigo-400">admin.kupera.in</span>
             </div>
             <div className="flex items-center justify-between text-muted-foreground">
-              <span>Hostel Manager Domain:</span>
-              <span className="font-bold text-foreground/90">hostelhub.app (or localhost:3000)</span>
+              <span>Hostel Manager Subdomain:</span>
+              <span className="font-bold text-foreground/90">app.kupera.in</span>
             </div>
             <div className="flex items-center justify-between text-muted-foreground">
-              <span>Local Dev Subdomain:</span>
-              <span className="font-bold text-foreground/90">admin.localhost:3000</span>
+              <span>Marketing & Public Site:</span>
+              <span className="font-bold text-foreground/90">kupera.in</span>
             </div>
             <div className="flex items-center justify-between text-muted-foreground">
-              <span>Direct Path Access:</span>
-              <span className="font-bold text-foreground/90">/admin/*</span>
+              <span>Local Dev Simulation:</span>
+              <span className="font-bold text-foreground/90">localhost:3000 (with subdomain emulation)</span>
             </div>
           </div>
 

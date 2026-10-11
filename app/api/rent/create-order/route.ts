@@ -30,12 +30,8 @@ export async function POST(request: Request) {
     const transfers = ownerAccount ? [
       {
         account: ownerAccount.razorpay_account_id,
-        amount: body.amount * 100, // 100% transfer route
+        amount: body.amount * 100,
         currency: 'INR',
-        notes: {
-          note: 'Hostelhood Rent Collection'
-        },
-        linked_account_notes: ['note'],
         on_hold: 0,
       }
     ] : undefined;
