@@ -39,18 +39,41 @@ export function TenantPaymentClient({ invoice }: { invoice: any }) {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_mock_key',
         amount: data.amount * 100,
         currency: data.currency,
-        name: invoice.hostel?.name || 'Hostelhood Rent',
-        description: `Rent for ${invoice.billing_month}/${invoice.billing_year}`,
+        name: invoice.hostel?.name || 'Kupera Hostel Rent',
+        description: `Rent for ${invoice.billing_month}/${invoice.billing_year} (UPI / QR Zero Fee)`,
         order_id: data.orderId,
         handler: function (response: any) {
           // Success
           setPaymentState('success');
-          // In real app, trigger backend to send Success Email and update status
         },
         prefill: {
           name: invoice.tenant?.full_name || 'Tenant Name',
           email: invoice.tenant?.email || 'tenant@example.com',
-          contact: invoice.tenant?.phone || '9999999999'
+          contact: invoice.tenant?.phone || '9999999999',
+          method: 'upi', // Pre-select instant UPI app intent
+        },
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: 'Pay via UPI / QR (Zero Convenience Fee)',
+                instruments: [
+                  { method: 'upi' }
+                ],
+              },
+              other: {
+                name: 'Other Payment Methods',
+                instruments: [
+                  { method: 'netbanking' },
+                  { method: 'card' }
+                ],
+              },
+            },
+            sequence: ['block.upi', 'block.other'],
+            preferences: {
+              show_default_blocks: true,
+            },
+          },
         },
         theme: { color: "#4F46E5" }
       };

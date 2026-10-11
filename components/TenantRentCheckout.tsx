@@ -61,27 +61,41 @@ export function TenantRentCheckout({
         throw new Error(data.error || 'Failed to initialize payment');
       }
 
-      // 2. Open Razorpay Checkout
+      // 2. Open Razorpay Checkout with UPI preference
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_mock_key',
         amount: data.amount * 100,
         currency: data.currency,
-        name: 'Hostelhood Rent',
-        description: `Rent for ${month} ${year} - Room ${roomNumber}`,
+        name: 'Kupera Hostel Rent',
+        description: `Rent for ${month} ${year} - Room ${roomNumber} (Zero Fee UPI)`,
         order_id: data.orderId,
         handler: function (response: any) {
           // Payment successful (webhook will handle DB updates and PDF)
           toast({
-            title: "Payment Successful",
+            title: "Payment Successful 🎉",
             description: "Your rent receipt is being generated.",
           });
           onOpenChange(false);
           if (onSuccess) onSuccess();
         },
         prefill: {
-          name: "Tenant Name", // Ideally fetched from context
-          email: "tenant@example.com",
-          contact: "9999999999"
+          name: "Resident",
+          contact: "9999999999",
+          method: 'upi',
+        },
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: 'Instant UPI / QR (Zero Fee)',
+                instruments: [{ method: 'upi' }],
+              },
+            },
+            sequence: ['block.upi'],
+            preferences: {
+              show_default_blocks: true,
+            },
+          },
         },
         theme: {
           color: "#4F46E5" // Indigo 600

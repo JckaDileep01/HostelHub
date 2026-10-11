@@ -10,13 +10,15 @@ const razorpay = new Razorpay({
 
 export async function POST(request: Request) {
   try {
-    const body: CreateRentOrderRequest = await request.json();
+    const body: CreateRentOrderRequest & { payerType?: string } = await request.json();
 
     if (!body.tenantId || !body.hostelId || !body.roomNumber || !body.month || !body.year || !body.amount) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // 1. Fetch target owner's razorpay_account_id
+    const payerType = body.payerType || 'tenant_rent';
+
+    // 1. Fetch target owner's razorpay_account_id if Route transfer is configured
     const { data: ownerAccount, error: ownerError } = await supabase
       .from('owner_payment_accounts')
       .select('razorpay_account_id')
@@ -24,7 +26,7 @@ export async function POST(request: Request) {
       .single();
 
     if (ownerError) {
-      console.warn('Could not fetch owner payment account, proceeding without transfer route for now:', ownerError);
+      // Proceed directly to master account (zero-fee master collection model)
     }
 
     const transfers = ownerAccount ? [
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
     try {
         if (process.env.RAZORPAY_KEY_ID) {
             const orderOptions: any = {
-                amount: body.amount * 100,
+                amount: Math.round(body.amount * 100),
                 currency: 'INR',
                 receipt: `rcpt_rent_${Date.now()}`,
                 notes: {
@@ -52,6 +54,8 @@ export async function POST(request: Request) {
                   month: body.month,
                   year: body.year.toString(),
                   room: body.roomNumber,
+                  payer_type: payerType,
+                  category: 'tenant_rent',
                 },
             };
             if (transfers) {
